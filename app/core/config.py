@@ -23,8 +23,8 @@ class ProjectSettings(FastAPISettings):
 
 
 class UvicornSettings(Settings):
-    host: str = "127.0.0.1"
-    port: int = 8080
+    host: str = Field(..., env="API_HOST")
+    port: int = Field(..., env="API_PORT")
     reload: bool = True
     debug: bool = True
 

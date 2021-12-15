@@ -6,7 +6,7 @@ from common.config import redis_settings
 
 async def get_redis() -> Redis:
     """
-    Корутина, возвращающая уже подключенный объект к Redis-хранилищу.
+    Функция, возвращающая уже подключенный объект к Redis-хранилищу.
 
     Returns:
         `Redis` - объект, предоставляющий интерфейс к Redis-хранилищу.

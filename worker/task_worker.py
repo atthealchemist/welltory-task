@@ -5,7 +5,6 @@ from aiologger import Logger
 
 from common.enums.task import TaskStatus
 from common.models.task import TaskModel
-from common.services.redis import get_redis
 from common.services.tasks import TaskRepository
 from worker.interfaces.worker import WorkerInterface
 
@@ -43,11 +42,6 @@ class TaskWorker(WorkerInterface):
                 if task.status == TaskStatus.IDLE:
                     await self.process_task(task)
 
-    def start(self) -> None:
-        asyncio.run(self.run())
-
-    def __init__(self) -> None:
-        self._loop = asyncio.get_event_loop()
-        self._redis = self._loop.run_until_complete(get_redis())
-        self._repo = TaskRepository(redis=self._redis)
+    def __init__(self, repository: TaskRepository) -> None:
+        self._repo = repository
         self._logger = Logger.with_default_handlers(name=self.__class__.__name__)
