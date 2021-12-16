@@ -1,5 +1,5 @@
 pytest_plugins = [
-    "tests.app.fixtures.common",
-    "tests.app.fixtures.tasks",
-    "tests.worker.fixtures.common",
+    "tests.common.fixtures",
+    "tests.app.fixtures",
+    "tests.worker.fixtures",
 ]

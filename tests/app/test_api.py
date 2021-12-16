@@ -12,7 +12,7 @@ class TestTasksAPI:
         assert len(res.json()) > 0
 
     def test_task_create(self, client, task_create_payload):
-        res = client.post(f"{TASKS_ROOT}/", json=task_create_payload)
+        res = client.post(f"{TASKS_ROOT}/", json=task_create_payload.dict())
         assert res.status_code == status.HTTP_201_CREATED
 
     def test_task_get(self, client, fake_tasks_list):
