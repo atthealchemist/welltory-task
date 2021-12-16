@@ -19,7 +19,8 @@ class TaskRepository(TaskRepositoryInterface):
 
     async def add(self, task: TaskModel) -> None:
         serialized_task = task.json()
-        return await self._redis.set(f"task:{task.id}", serialized_task)
+        result = await self._redis.set(f"task:{task.id}", serialized_task)
+        return result
 
     async def get(self, task_id: UUID4) -> Union[TaskModel, bool]:
         task_serialized = await self._redis.get(f"task:{task_id}")
@@ -52,4 +53,4 @@ class TaskRepository(TaskRepositoryInterface):
 
     async def delete(self, task_id: UUID4) -> bool:
         result = await self._redis.delete(f"task:{task_id}")
-        return bool(result)
+        return result

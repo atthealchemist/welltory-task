@@ -1,15 +1,18 @@
-import uuid
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Response, status
 from fastapi.param_functions import Query
 from pydantic.types import UUID4
 
 from app.core.dependencies import get_tasks_repository
 from app.core.errors import TaskCreationError, TaskNotFound
 from common.enums.task import TaskStatus
-from common.models.task import (TaskCreate, TaskCreateResponse,
-                                TaskDeleteResponse, TaskModel)
+from common.models.task import (
+    TaskCreate,
+    TaskCreateResponse,
+    TaskDeleteResponse,
+    TaskModel,
+)
 from common.services.tasks import TaskRepository
 
 router = APIRouter()
@@ -31,16 +34,18 @@ async def get_task(
     return task
 
 
-@router.post("/", summary="Добавить новую задачу")
+@router.post("/", name="tasks:create", summary="Добавить новую задачу")
 async def create_task(
-    task: TaskCreate, tasks_repo: TaskRepository = Depends(get_tasks_repository)
+    task: TaskCreate,
+    response: Response,
+    tasks_repo: TaskRepository = Depends(get_tasks_repository),
 ):
-    new_task_uuid = uuid.uuid4()
-    new_task = TaskModel(id=new_task_uuid, **task.dict())
-    status = await tasks_repo.add(new_task)
-    if not status:
+    new_task = TaskModel(**task.dict())
+    is_created = await tasks_repo.add(new_task)
+    if not is_created:
         raise TaskCreationError(task=new_task)
-    return TaskCreateResponse(id=new_task_uuid)
+    response.status_code = status.HTTP_201_CREATED
+    return TaskCreateResponse(id=new_task.id)
 
 
 @router.get(
@@ -48,7 +53,7 @@ async def create_task(
 )
 async def list_tasks(
     tasks_repo: TaskRepository = Depends(get_tasks_repository),
-    status: Optional[TaskStatus] = Query(..., description="Статус задачи"),
+    status: Optional[TaskStatus] = Query(None, description="Статус задачи"),
 ):
     tasks = await tasks_repo.list_all()
     if status:
@@ -57,7 +62,10 @@ async def list_tasks(
 
 
 @router.delete(
-    "/{task_id}", response_model=TaskDeleteResponse, summary="Удалить задачу"
+    "/{task_id}",
+    response_model=TaskDeleteResponse,
+    name="tasks:delete",
+    summary="Удалить задачу",
 )
 async def delete_task(
     task_id: UUID4 = Path(..., description="Уникальный идентификатор задачи"),

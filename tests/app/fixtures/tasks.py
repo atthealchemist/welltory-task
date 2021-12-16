@@ -1,9 +1,15 @@
+import json
 import uuid
 
 import pytest
 
-from common.models.task import (TaskCreate, TaskCreateResponse,
-                                TaskDeleteResponse)
+from common.enums.task import TaskStatus
+from common.models.task import (
+    TaskCreate,
+    TaskCreateResponse,
+    TaskDeleteResponse,
+    TaskModel,
+)
 
 
 @pytest.fixture
@@ -13,12 +19,12 @@ def task_fake_uuid():
 
 @pytest.fixture
 def task_create_payload():
-    return TaskCreate(title="Sample Task", duration=30).json()
+    return json.loads(TaskCreate(title="Sample Task", duration=30).json())
 
 
 @pytest.fixture
 def task_create_response_payload(task_fake_uuid):
-    return TaskCreateResponse(id=task_fake_uuid).json()
+    return TaskCreateResponse(id=task_fake_uuid)
 
 
 @pytest.fixture
@@ -34,3 +40,20 @@ def task_get_payload(task_fake_uuid):
         "duration": 999,
         "status": "idle",
     }
+
+
+@pytest.fixture
+def task_model_factory(task_fake_uuid):
+    def new(
+        title: str = "Sample Task",
+        duration: int = 1,
+        status: TaskStatus = TaskStatus.IDLE,
+    ):
+        return TaskModel(
+            id=task_fake_uuid,
+            title=f"{title} {task_fake_uuid}",
+            duration=duration,
+            status=status,
+        )
+
+    return new
